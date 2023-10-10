@@ -16,12 +16,6 @@ if [ -z "${POSTGRES_USER}" ]; then
 fi
 export DATABASE_URL="postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}"
 
-# Start debugging with debugpy if DEBUG is set to "true"
-# if [ "$DEBUG" = "true" ]; then
-echo "Starting Django with debugpy..."
-python -m debugpy --listen 0.0.0.0:5678 --wait-for-client ./manage.py runserver 0.0.0.0:8000 &
-# fi
-
 python << END
 import sys
 import time

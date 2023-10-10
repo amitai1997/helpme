@@ -22,9 +22,7 @@ services:
       - ./.envs/.local/.postgres
     ports:
       - '8000:8000'
-      - '5678:5678'
     command: /start
-    # entrypoint: [ "python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "./manage.py", "--wait-for-client", "--multiprocess", "runserver", "0.0.0.0:3000" ]
 
   postgres:
     build:
@@ -37,8 +35,6 @@ services:
       - helpme_local_postgres_data_backups:/backups
     env_file:
       - ./.envs/.local/.postgres
-    ports:
-      - '5432:5432'
 
   docs:
     image: helpme_local_docs
