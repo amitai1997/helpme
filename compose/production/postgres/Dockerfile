@@ -1,4 +1,7 @@
-FROM postgres:14
+FROM postgis/postgis:14-3.3
+
+# Copy the initialization script into the Docker image
+COPY ./compose/local/postgres/init-script.sql /docker-entrypoint-initdb.d/
 
 COPY ./compose/production/postgres/maintenance /usr/local/bin/maintenance
 RUN chmod +x /usr/local/bin/maintenance/*
