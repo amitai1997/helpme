@@ -5,14 +5,11 @@ set -o pipefail
 set -o nounset
 
 # Start debugpy with your Django application
-# python -m debugpy --listen 0.0.0.0:5678 --wait-for-client manage.py runserver 0.0.0.0:8000 &
-python -m debugpy --listen 0.0.0.0:5678 --wait-for-client manage.py runserver 0.0.0.0:8000 &
+# python -m debugpy --listen 0.0.0.0:5678 --wait-for-client manage.py runserver 0.0.0.0:8001 &
+python -m debugpy --listen 0.0.0.0:5678 manage.py runserver 0.0.0.0:8001 &
 
 # Wait for debugpy to start
 sleep 5
-
-# Run wait-for-it.sh and Django server in the same line
-./wait-for-it.sh postgres:5432 && python manage.py runserver 0.0.0.0:8000 &
 
 python manage.py migrate
 exec uvicorn config.asgi:application --host 0.0.0.0 --reload --reload-include '*.html'
