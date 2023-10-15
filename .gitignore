@@ -286,3 +286,4 @@ vendors.js
 !.envs/.local/
 
 helpme-venv/
+certs/*

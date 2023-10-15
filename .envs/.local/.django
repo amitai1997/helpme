@@ -15,3 +15,9 @@ CELERY_FLOWER_PASSWORD=debug
 
 DATABASE_URL=postgres://debug:debug@postgres:5432/helpme
 CELERY_BROKER_URL=redis://redis:6379/0
+
+
+# HTTPS
+# ------------------------------------------------------------------------------
+VIRTUAL_HOST=helpme.co.il
+VIRTUAL_PORT=8001
