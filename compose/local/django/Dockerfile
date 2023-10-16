@@ -6,6 +6,7 @@ FROM python as python-build-stage
 
 ARG BUILD_ENVIRONMENT=local
 
+RUN apt install -y gdal-bin
 # Install apt packages
 RUN apt-get update && apt-get install --no-install-recommends -y \
   # dependencies for building Python packages

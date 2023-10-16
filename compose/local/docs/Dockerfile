@@ -7,7 +7,9 @@ FROM python as python-build-stage
 
 ENV PYTHONDONTWRITEBYTECODE 1
 
-RUN apt-get update && apt-get install --no-install-recommends -y \
+RUN apt update && apt install -y gdal-bin
+
+RUN apt-get install --no-install-recommends -y \
   # dependencies for building Python packages
   build-essential \
   # psycopg2 dependencies
@@ -32,7 +34,9 @@ ARG BUILD_ENVIRONMENT
 ENV PYTHONUNBUFFERED 1
 ENV PYTHONDONTWRITEBYTECODE 1
 
-RUN apt-get update && apt-get install --no-install-recommends -y \
+RUN apt update && apt install -y gdal-bin
+
+RUN apt-get install --no-install-recommends -y \
   # To run the Makefile
   make \
   # psycopg2 dependencies

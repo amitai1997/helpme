@@ -21,6 +21,14 @@ class User(AbstractUser):
     email = EmailField(_("email address"), unique=True)
     username = None  # type: ignore
 
+    contact_number = models.CharField(max_length=20, null=True, blank=True)
+    user_roles = (
+        ("user", "User"),
+        ("volunteer", "Volunteer"),
+        ("admin", "Admin"),
+    )
+    role = models.CharField(max_length=20, choices=user_roles, default="user")
+
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
 
@@ -34,6 +42,9 @@ class User(AbstractUser):
 
         """
         return reverse("users:detail", kwargs={"pk": self.id})
+
+    def __str__(self):
+        return self.username
 
 
 class Location(models.Model):
