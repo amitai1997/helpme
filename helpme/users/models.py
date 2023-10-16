@@ -39,3 +39,6 @@ class User(AbstractUser):
 class Location(models.Model):
     name = models.CharField(max_length=255)
     geometry = models.PointField()
+
+    def __str__(self):
+        return f"{self.name} ({self.geometry.x:.6f}, {self.geometry.y:.6f})"
