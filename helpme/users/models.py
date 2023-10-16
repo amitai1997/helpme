@@ -44,12 +44,4 @@ class User(AbstractUser):
         return reverse("users:detail", kwargs={"pk": self.id})
 
     def __str__(self):
-        return self.username
-
-
-class Location(models.Model):
-    name = models.CharField(max_length=255)
-    geometry = models.PointField()
-
-    def __str__(self):
-        return f"{self.name} ({self.geometry.x:.6f}, {self.geometry.y:.6f})"
+        return self.email
