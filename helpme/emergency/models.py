@@ -62,11 +62,13 @@ class Profile(models.Model):
 
 
 class EmergencyCall(models.Model):
+    title = models.CharField(max_length=20, null=True)
     location = gis_models.PointField(geography=True)
     description = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    status = models.CharField(max_length=20, default="pending")
+    STATUSES = [("Pending", "Pending"), ("Resolved", "resolved")]
+    status = models.CharField(max_length=20, choices=STATUSES, default="pending")
 
     def __str__(self):
         return f"Emergency Call by {self.user.name}"

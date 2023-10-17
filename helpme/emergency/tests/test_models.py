@@ -32,6 +32,7 @@ class ModelTestCase(TestCase):
 
     def test_emergency_call_creation(self):
         call = EmergencyCall.objects.create(
+            title="some title",
             location=Point(12.9716, 77.5946),
             description="Emergency at location",
             user=self.user,

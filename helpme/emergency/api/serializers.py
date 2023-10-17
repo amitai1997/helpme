@@ -1,9 +1,27 @@
+from django.contrib.gis.geos import Point
 from rest_framework import serializers
 
 from helpme.emergency.models import EmergencyCall, Notification, Profile, RescueTeam, UserLocation, Volunteer
 
 
+class LocationPointField(serializers.Field):
+    def to_internal_value(self, data):
+        # Parse the location string and create a Point object
+        try:
+            latitude, longitude = map(float, data.split(","))
+            return Point(longitude, latitude)  # Order is (x, y)
+        except (ValueError, AttributeError):
+            raise serializers.ValidationError("Invalid location format.")
+
+    def to_representation(self, value):
+        if value is None:
+            return None
+        return f"{value.y},{value.x}"
+
+
 class EmergencyCallSerializer(serializers.ModelSerializer):
+    location = LocationPointField()
+
     class Meta:
         model = EmergencyCall
         fields = "__all__"
