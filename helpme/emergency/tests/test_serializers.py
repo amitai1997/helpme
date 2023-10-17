@@ -1,6 +1,7 @@
 from rest_framework.test import APITestCase
 
 from helpme.emergency.api.serializers import ProfileSerializer
+from helpme.emergency.models import Profile
 from helpme.users.models import User
 
 
@@ -27,6 +28,9 @@ class ProfileSerializerTests(APITestCase):
         }
         serializer = ProfileSerializer(data=data)
         self.assertTrue(serializer.is_valid())
+
+        profile = Profile.objects.create(**data)
+        return profile
 
     def test_invalid_identification_number(self):
         data = {

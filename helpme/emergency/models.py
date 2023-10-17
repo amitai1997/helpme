@@ -85,7 +85,7 @@ class Volunteer(models.Model):
 
 class RescueTeam(models.Model):
     name = models.CharField(max_length=255)
-    team_leader = models.ForeignKey(User, on_delete=models.CASCADE)
+    team_leader = models.ForeignKey(Profile, on_delete=models.CASCADE)
     contact_information = models.TextField()
 
     def __str__(self):
@@ -103,7 +103,7 @@ class Notification(models.Model):
 
 
 class UserLocation(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(Profile, on_delete=models.CASCADE)
     location = gis_models.PointField(geography=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 
