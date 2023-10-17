@@ -287,3 +287,5 @@ vendors.js
 
 helpme-venv/
 certs/*
+
+**/migrations/

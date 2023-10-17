@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from helpme.emergency.models import EmergencyCall, Notification, RescueTeam, UserLocation, Volunteer
+from helpme.emergency.models import EmergencyCall, Notification, Profile, RescueTeam, UserLocation, Volunteer
 
 
 class EmergencyCallSerializer(serializers.ModelSerializer):
@@ -30,4 +30,10 @@ class NotificationSerializer(serializers.ModelSerializer):
 class UserLocationSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserLocation
+        fields = "__all__"
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
         fields = "__all__"

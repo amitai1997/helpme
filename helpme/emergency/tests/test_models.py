@@ -1,7 +1,7 @@
 from django.contrib.gis.geos import Point
 from django.test import TestCase
 
-from helpme.emergency.models import EmergencyCall, Notification, RescueTeam, UserLocation, Volunteer
+from helpme.emergency.models import EmergencyCall, Notification, Profile, RescueTeam, UserLocation, Volunteer
 from helpme.users.models import User
 
 
@@ -66,3 +66,38 @@ class ModelTestCase(TestCase):
         self.assertEqual(location.user, self.user)
         self.assertEqual(location.location.x, 12.9716)
         self.assertEqual(location.location.y, 77.5946)
+
+
+class ProfileModelTestCase(TestCase):
+    def setUp(self):
+        # Create a user and a profile for testing
+        self.user = User.objects.create_user(email="testuser", name="testuser", password="testpassword")
+        self.profile = Profile.objects.create(
+            user=self.user,
+            identification_number="123456789",
+            gender="Male",
+            date_of_birth="2000-01-01",
+            city="TestCity",
+            preferred_area="North",
+            carrying_weapon=True,
+            driving_license_tractor=False,
+        )
+
+    def test_profile_creation(self):
+        # Test if the profile was created correctly
+        self.assertEqual(self.profile.identification_number, "123456789")
+        self.assertEqual(self.profile.gender, "Male")
+        self.assertEqual(str(self.profile.date_of_birth), "2000-01-01")
+        self.assertEqual(self.profile.city, "TestCity")
+        self.assertEqual(self.profile.preferred_area, "North")
+        self.assertTrue(self.profile.carrying_weapon)
+        self.assertFalse(self.profile.driving_license_tractor)
+
+    def test_profile_user_relation(self):
+        # Test if the profile is associated with the correct user
+        self.assertEqual(self.profile.user, self.user)
+
+    def test_profile_str_representation(self):
+        # Test the string representation of the profile
+        expected_str = f"Profile for {self.user.name}"
+        self.assertEqual(str(self.profile), expected_str)

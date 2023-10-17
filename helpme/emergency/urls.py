@@ -4,6 +4,7 @@ from rest_framework import routers
 from helpme.emergency.api.views import (
     EmergencyCallViewSet,
     NotificationViewSet,
+    ProfileViewSet,
     RescueTeamViewSet,
     UserLocationViewSet,
     VolunteerViewSet,
@@ -17,6 +18,7 @@ router.register(r"volunteers", VolunteerViewSet)
 router.register(r"rescue-teams", RescueTeamViewSet)  # optional
 router.register(r"notifications", NotificationViewSet)
 router.register(r"user-locations", UserLocationViewSet)
+router.register(r"profiles", ProfileViewSet)
 
 urlpatterns = [
     # ... your other URL patterns ...
