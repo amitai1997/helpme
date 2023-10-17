@@ -103,7 +103,7 @@ class Notification(models.Model):
 
 
 class UserLocation(models.Model):
-    user = models.ForeignKey(Profile, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     location = gis_models.PointField(geography=True)
     timestamp = models.DateTimeField(auto_now_add=True)
 

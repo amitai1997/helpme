@@ -2,7 +2,6 @@ from django.contrib.gis.geos import Point
 from django.test import TestCase
 
 from helpme.emergency.models import EmergencyCall, Notification, Profile, RescueTeam, UserLocation, Volunteer
-from helpme.emergency.tests.test_serializers import ProfileSerializerTests
 from helpme.users.models import User
 
 
@@ -15,7 +14,16 @@ class ModelTestCase(TestCase):
             password="testpassword",
         )
 
-        self.profile = ProfileSerializerTests.test_valid_serializer_data()
+        self.profile = Profile.objects.create(
+            user=self.user,
+            identification_number="123456789",
+            gender="Male",
+            date_of_birth="2000-01-01",
+            city="TestCity",
+            preferred_area="North",
+            carrying_weapon=True,
+            driving_license_tractor=False,
+        )
 
     def test_custom_user_creation(self):
         user = User.objects.get(email="testuser@example.com")
@@ -34,7 +42,7 @@ class ModelTestCase(TestCase):
 
     def test_volunteer_creation(self):
         volunteer = Volunteer.objects.create(
-            profile=self.user.profile,
+            user=self.user,
             location=Point(12.9716, 77.5946),
             skills="First Aid, CPR",
             availability_status=True,
@@ -46,11 +54,11 @@ class ModelTestCase(TestCase):
     def test_rescue_team_creation(self):
         team = RescueTeam.objects.create(
             name="Rescue Team 1",
-            team_leader=self.user,
+            team_leader=self.profile,
             contact_information="team@example.com",
         )
         self.assertEqual(team.name, "Rescue Team 1")
-        self.assertEqual(team.team_leader, self.user)
+        self.assertEqual(team.team_leader, self.profile)
 
     def test_notification_creation(self):
         notification = Notification.objects.create(
@@ -75,10 +83,9 @@ class ProfileModelTestCase(TestCase):
     def setUp(self):
         # Create a user and a profile for testing
         self.user = User.objects.create_user(email="testuser", name="testuser", password="testpassword")
-        user = User.objects.get(email="testuser@example.com")
 
         self.profile = Profile.objects.create(
-            user=user.pk,
+            user=self.user,
             identification_number="123456789",
             gender="Male",
             date_of_birth="2000-01-01",
