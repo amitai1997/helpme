@@ -66,6 +66,8 @@ services:
   redis:
     image: redis:6
     container_name: helpme_local_redis
+    ports:
+      - '6379:6379'
 
   celeryworker:
     <<: *django
@@ -115,9 +117,9 @@ services:
       # Expose browsersync UI: https://www.browsersync.io/docs/options/#option-ui
       - '3001:3001'
 
-  nginx-proxy:
+  nginx:
     image: jwilder/nginx-proxy:alpine
-    container_name: nginx-proxy
+    container_name: helpme-local-nginx
     ports:
       - '80:80'
       - '443:443'
