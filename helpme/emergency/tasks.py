@@ -46,7 +46,7 @@ def match_volunteers(emergency_call):
 @shared_task()
 def send_feedback_email_task(email_address, message):
     try:
-        sleep(21)  # Simulate expensive operation(s) that freeze Django
+        sleep(10)  # Simulate expensive operation(s) that freeze Django
         send_mail(
             "Your Feedback",
             f"\t{message}\n\nThank you!",
