@@ -1,33 +1,20 @@
-# from django.shortcuts import render
-from time import sleep
-
-from django.core.mail import send_mail
 from django.http import JsonResponse
 from rest_framework.views import View
 
-# from helpme.emergency.tasks import send_notifications
+from helpme.emergency.tasks import send_feedback_email_task
 
 
 class SendEmailView(View):
     def get(self, request):
-        """Sends an email when the feedback form has been submitted."""
+        """Enqueue a task to send an email when the feedback form has been submitted."""
+        message = request.GET.get("message", "")
+        email_address = request.GET.get("email_address", "")
+
+        if not email_address:
+            return JsonResponse({"error": "email_address is required."}, status=400)
+
         try:
-            # Get data from the request object
-            message = request.GET.get("message", "")
-            email_address = request.GET.get("email_address", "")
-
-            # Simulate expensive operation(s) with sleep
-            sleep(20)
-
-            # Send email
-            send_mail(
-                "Your Feedback",
-                f"\t{message}\n\nThank you!",
-                "support@example.com",
-                [email_address],
-                fail_silently=False,
-            )
-
-            return JsonResponse({"message": "Email sent successfully!."})
+            result = send_feedback_email_task.delay(email_address, message)
+            return JsonResponse({"message": "Email will be sent in the background.", "task_id": result.id})
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)

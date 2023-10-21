@@ -1,5 +1,9 @@
 # from celery import shared_task
+from time import sleep
+
+from celery import shared_task
 from django.contrib.gis.db.models.functions import Distance
+from django.core.mail import send_mail
 from django.db.models import Q
 
 from config import celery_app
@@ -37,3 +41,19 @@ def match_volunteers(emergency_call):
     )
 
     return matched_volunteers
+
+
+@shared_task()
+def send_feedback_email_task(email_address, message):
+    try:
+        sleep(21)  # Simulate expensive operation(s) that freeze Django
+        send_mail(
+            "Your Feedback",
+            f"\t{message}\n\nThank you!",
+            "support@helpme.co.il",
+            [email_address],
+            fail_silently=False,
+        )
+        return {"success": True, "message": "Email sent successfully."}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
