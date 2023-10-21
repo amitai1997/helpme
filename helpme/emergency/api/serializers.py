@@ -28,6 +28,8 @@ class EmergencyCallSerializer(serializers.ModelSerializer):
 
 
 class VolunteerSerializer(serializers.ModelSerializer):
+    location = LocationPointField()
+
     class Meta:
         model = Volunteer
         fields = "__all__"
