@@ -1,7 +1,7 @@
 from django.contrib.gis.db import models as gis_models
-
-# from django.contrib.gis.geos import Point
 from django.db import models
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
 
 from helpme.users.models import User
 
@@ -92,6 +92,13 @@ class EmergencyType(models.Model):
         return self.name
 
 
+@receiver(pre_delete, sender=EmergencyType)
+def remove_skills_from_volunteers(sender, instance, **kwargs):
+    # Remove the skills from all volunteers associated with this EmergencyType
+    for volunteer in Volunteer.objects.filter(skills=instance):
+        volunteer.skills.remove(instance)
+
+
 class EmergencyCall(models.Model):
     title = models.CharField(max_length=20, null=True)
     location = gis_models.PointField(geography=True)
@@ -114,7 +121,7 @@ class Notification(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Notification for {self.emergency_type} emergency"
+        return f"Notification for {self.emergency_call} emergency"
 
     class Meta:
         ordering = ["-timestamp"]

@@ -1,7 +1,15 @@
 from django.contrib.gis.geos import Point
 from django.test import TestCase
 
-from helpme.emergency.models import EmergencyCall, Notification, Profile, RescueTeam, UserLocation, Volunteer
+from helpme.emergency.models import (
+    EmergencyCall,
+    EmergencyType,
+    Notification,
+    Profile,
+    RescueTeam,
+    UserLocation,
+    Volunteer,
+)
 from helpme.users.models import User
 
 
@@ -45,11 +53,10 @@ class ModelTestCase(TestCase):
         volunteer = Volunteer.objects.create(
             user=self.user,
             location=Point(12.9716, 77.5946),
-            skills="First Aid, CPR",
             availability_status=True,
             contact_information="volunteer@example.com",
         )
-        self.assertEqual(volunteer.skills, "First Aid, CPR")
+
         self.assertTrue(volunteer.availability_status)
 
     def test_rescue_team_creation(self):
@@ -63,12 +70,12 @@ class ModelTestCase(TestCase):
 
     def test_notification_creation(self):
         notification = Notification.objects.create(
-            message="Emergency call update",
-            receiver=self.user,
-            related_call=None,
+            emergency_call=None,
         )
-        self.assertEqual(notification.message, "Emergency call update")
-        self.assertEqual(notification.receiver, self.user)
+
+        notification.receivers.add(self.user)
+
+        self.assertTrue(notification.receivers.filter(id=self.user.id).exists())
 
     def test_user_location_creation(self):
         location = UserLocation.objects.create(
@@ -114,3 +121,39 @@ class ProfileModelTestCase(TestCase):
         # Test the string representation of the profile
         expected_str = f"Profile for {self.user.name}"
         self.assertEqual(str(self.profile), expected_str)
+
+
+class EmergencyTypeSkillRemovalTestCase(TestCase):
+    def setUp(self):
+        # Create a test user
+        self.user = User.objects.create_user(
+            name="testuser",
+            email="testuser@example.com",
+            password="testpassword",
+        )
+
+        # Create an EmergencyType
+        self.emergency_type = EmergencyType.objects.create(name="Test Emergency Type")
+
+        # Create a Volunteer
+        self.volunteer = Volunteer.objects.create(
+            user=self.user,
+            location=Point(12.9716, 77.5946),
+            availability_status=True,
+            contact_information="volunteer@example.com",
+        )
+        # Add the EmergencyType to the volunteer's skills
+        self.volunteer.skills.add(self.emergency_type)
+
+    def test_skill_removal_on_emergency_type_deletion(self):
+        # Verify that the EmergencyType is associated with the Volunteer
+        self.assertIn(self.emergency_type, self.volunteer.skills.all())
+
+        # Delete the EmergencyType
+        self.emergency_type.delete()
+
+        # Reload the Volunteer instance from the database
+        self.volunteer.refresh_from_db()
+
+        # Verify that the EmergencyType has been removed from the Volunteer's skills
+        self.assertNotIn(self.emergency_type, self.volunteer.skills.all())

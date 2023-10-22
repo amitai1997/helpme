@@ -1,9 +1,18 @@
 from rest_framework import viewsets
 
-from helpme.emergency.models import EmergencyCall, Notification, Profile, RescueTeam, UserLocation, Volunteer
+from helpme.emergency.models import (
+    EmergencyCall,
+    EmergencyType,
+    Notification,
+    Profile,
+    RescueTeam,
+    UserLocation,
+    Volunteer,
+)
 
 from .serializers import (
     EmergencyCallSerializer,
+    EmergencyTypeSerializer,
     NotificationSerializer,
     ProfileSerializer,
     RescueTeamSerializer,
@@ -46,3 +55,9 @@ class UserLocationViewSet(viewsets.ModelViewSet):
 class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
+
+
+# UserProfile view
+class EmergencyTypeViewSet(viewsets.ModelViewSet):
+    queryset = EmergencyType.objects.all()
+    serializer_class = EmergencyTypeSerializer

@@ -1,7 +1,15 @@
 from django.contrib.gis.geos import Point
 from rest_framework import serializers
 
-from helpme.emergency.models import EmergencyCall, Notification, Profile, RescueTeam, UserLocation, Volunteer
+from helpme.emergency.models import (
+    EmergencyCall,
+    EmergencyType,
+    Notification,
+    Profile,
+    RescueTeam,
+    UserLocation,
+    Volunteer,
+)
 
 
 class LocationPointField(serializers.Field):
@@ -76,3 +84,9 @@ class ProfileSerializer(serializers.ModelSerializer):
         if len(value) < 2:
             raise serializers.ValidationError("City name is too short.")
         return value
+
+
+class EmergencyTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = EmergencyType
+        fields = "__all__"
