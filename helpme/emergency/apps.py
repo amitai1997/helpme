@@ -1,5 +1,4 @@
 from django.apps import AppConfig
-from django.db.models.signals import post_migrate
 
 
 def create_emergency_types(sender, **kwargs):
@@ -13,4 +12,7 @@ class EmergencyConfig(AppConfig):
     name = "helpme.emergency"
 
     def ready(self):
-        post_migrate.connect(create_emergency_types, sender=self)
+        # post_migrate.connect(create_emergency_types, sender=self)
+        import helpme.emergency.signals as signals
+
+        print(signals)

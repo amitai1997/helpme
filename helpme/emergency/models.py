@@ -1,4 +1,5 @@
 from django.contrib.gis.db import models as gis_models
+from django.core import serializers
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
@@ -111,6 +112,14 @@ class EmergencyCall(models.Model):
 
     def __str__(self):
         return f"Emergency Call by {self.user.name}"
+
+    def to_json(self):
+        return serializers.serialize("json", [self])
+
+    @classmethod
+    def from_json(cls, json_data):
+        for obj in serializers.deserialize("json", json_data):
+            return obj.object
 
 
 class Notification(models.Model):

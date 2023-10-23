@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from rest_framework.views import View
 
-from helpme.emergency.tasks import send_feedback_email_task
+from helpme.emergency.tasks import send_notification_email
 
 
 class SendEmailView(View):
@@ -14,7 +14,7 @@ class SendEmailView(View):
             return JsonResponse({"error": "email_address is required."}, status=400)
 
         try:
-            result = send_feedback_email_task.delay(email_address, message)
+            result = send_notification_email.delay(email_address, message)
             return JsonResponse({"message": "Email will be sent in the background.", "task_id": result.id})
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)

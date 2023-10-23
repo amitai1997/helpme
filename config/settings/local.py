@@ -23,6 +23,8 @@ CACHES = {
     }
 }
 
+DJANGO_WATCHED_FILES = ["helpme.users", "helpme.emergency"]
+
 # EMAIL
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-host
