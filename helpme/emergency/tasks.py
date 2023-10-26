@@ -1,48 +1,53 @@
-# from celery import shared_task
 from time import sleep
 
 from celery import shared_task
 
-# from django.contrib.gis.db.models.functions import Distance
+# from django.db.models import F, Q
+from django.contrib.gis.db.models.functions import Distance
+from django.core import serializers
 from django.core.mail import send_mail
+from django.db import transaction
 
-# from config import celery_app
 from helpme.emergency.models import EmergencyCall, Notification, Volunteer
 
-# from django.db.models import F, Q
 
-
-@shared_task()
 def find_matching_volunteers(emergency_call_json):
-    # emergency_call = EmergencyCall.from_json(emergency_call_json)
+    emergency_call = EmergencyCall.from_json(emergency_call_json)
     # Extract location and required skills from the emergency call (you need to implement this part)
-    # required_location = emergency_call.location
+    required_location = emergency_call.location
     # required_skills = emergency_call.emergency_types.all()
 
-    # Match volunteers based on location and skills
-    # matched_volunteers = Volunteer.objects.filter(
-    #     Q(location__distance_lte=(Distance(F('location'), required_location), 1000)) & Q(skills__in=required_skills)
-    #      skills__in=required_skills
-    # )
-    matched_volunteers = Volunteer.objects.all()
+    matched_volunteers = (
+        Volunteer.objects.annotate(distance=Distance("location", required_location))
+        .filter(distance__lte=100 * 1000)
+        .order_by("distance")
+    )
 
-    return matched_volunteers
+    # return matched_volunteers
+    matching_volunteers_json = serializers.serialize("json", matched_volunteers)
+    return matching_volunteers_json
 
 
 @shared_task()
-def send_notifications(matching_volunteers, emergency_call_json):
+def send_notifications(matching_volunteers_json, emergency_call_json):
+    matching_volunteers_data = serializers.deserialize("json", matching_volunteers_json, ignorenonexistent=True)
+    matching_volunteers = [item.object for item in matching_volunteers_data]
+    matching_users = [volunteer.user for volunteer in matching_volunteers]
+
     emergency_call = EmergencyCall.from_json(emergency_call_json)
     # Implement the logic to create notifications and send them to matching volunteers
-    notification = Notification.objects.create(
-        emergency_call=emergency_call,
-    )
 
-    existing_users = matching_volunteers.values_list("user", flat=True)
-    # Create a notification
-    notification.receivers.set(existing_users)
+    with transaction.atomic():
+        emergency_call.save()
+        sleep(1)
+        notification = Notification.objects.create(
+            emergency_call=emergency_call,
+        )
+
+    for user in matching_users:
+        notification.receivers.add(user)
 
     for volunteer in matching_volunteers:
-        # Implement the notification sending logic (e.g., email, SMS, push notifications)
         send_notification_email.delay(volunteer.user.email, emergency_call_json)
 
 
@@ -50,7 +55,7 @@ def send_notifications(matching_volunteers, emergency_call_json):
 def send_notification_email(email_address, emergency_call_json):
     emergency_call = EmergencyCall.from_json(emergency_call_json)
     try:
-        sleep(3)  # Simulate expensive operation(s) that freeze Django
+        sleep(15)  # Simulate expensive operation(s) that freeze Django
         send_mail(
             f"{emergency_call.title}",
             f"\t{emergency_call.description}\n\nThank you!",

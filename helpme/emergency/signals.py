@@ -7,17 +7,18 @@ from helpme.emergency.models import EmergencyCall
 from helpme.emergency.tasks import find_matching_volunteers, send_notifications
 
 
-@receiver(post_save, sender=EmergencyCall)
+@receiver(post_save, sender=EmergencyCall, dispatch_uid="handle_emergency_call_creation_signal")
 def handle_emergency_call_creation(sender, instance, created, **kwargs):
     if created:
-        # When an emergency call is created, trigger the Celery tasks
-        # schedule_emergency_tasks.delay(instance.to_json())
-        schedule_emergency_tasks(instance.to_json())
+        schedule_emergency_tasks(instance.id)
 
 
 @shared_task
-def schedule_emergency_tasks(emergency_call_json):
-    # matching_volunteers = find_matching_volunteers.apply_async((instance,))
-    # send_notifications.apply_async((matching_volunteers.get(), instance))
-    matching_volunteers = find_matching_volunteers(emergency_call_json)
-    send_notifications(matching_volunteers, emergency_call_json)
+def schedule_emergency_tasks(emergency_call_id):
+    try:
+        emergency_call = EmergencyCall.objects.get(id=emergency_call_id)
+        matching_volunteers_json = find_matching_volunteers(emergency_call.to_json())
+        send_notifications(matching_volunteers_json, emergency_call.to_json())
+    except EmergencyCall.DoesNotExist:
+        # Handle the case where the EmergencyCall doesn't exist
+        pass
