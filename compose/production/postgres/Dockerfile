@@ -1,4 +1,4 @@
-FROM postgis/postgis:14-3.3
+FROM postgis/postgis:16-3.4
 
 # Copy the initialization script into the Docker image
 COPY ./compose/local/postgres/init-script.sql /docker-entrypoint-initdb.d/
