@@ -11,6 +11,17 @@ from django.db import transaction
 from helpme.emergency.models import EmergencyCall, Notification, Volunteer
 
 
+@shared_task
+def schedule_emergency_tasks(emergency_call_id):
+    try:
+        emergency_call = EmergencyCall.objects.get(id=emergency_call_id)
+        matching_volunteers_json = find_matching_volunteers(emergency_call.to_json())
+        send_notifications(matching_volunteers_json, emergency_call.to_json())
+    except EmergencyCall.DoesNotExist:
+        # Handle the case where the EmergencyCall doesn't exist
+        pass
+
+
 def find_matching_volunteers(emergency_call_json):
     emergency_call = EmergencyCall.from_json(emergency_call_json)
     # Extract location and required skills from the emergency call (you need to implement this part)
@@ -39,7 +50,6 @@ def send_notifications(matching_volunteers_json, emergency_call_json):
 
     with transaction.atomic():
         emergency_call.save()
-        sleep(1)
         notification = Notification.objects.create(
             emergency_call=emergency_call,
         )
