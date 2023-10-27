@@ -9,11 +9,11 @@ from helpme.users.models import User
 
 class Profile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    identification_number = models.CharField(max_length=20)
+    identification_number = models.CharField(max_length=20, null=True)
     GENDERS = [("Male", "Male"), ("Female", "Female")]
-    gender = models.CharField(max_length=10, choices=GENDERS)
-    date_of_birth = models.DateField()
-    city = models.CharField(max_length=100)
+    gender = models.CharField(max_length=10, choices=GENDERS, null=True)
+    date_of_birth = models.DateField(null=True)
+    city = models.CharField(max_length=100, null=True)
     PREFERRED_AREA_CHOICES = [
         ("North", "North"),
         ("South", "South"),
@@ -25,9 +25,11 @@ class Profile(models.Model):
         ("Valley", "Valley"),
         ("Not Determined", "Not Determined"),
     ]
-    preferred_area = models.CharField(max_length=20, choices=PREFERRED_AREA_CHOICES)
-    carrying_weapon = models.BooleanField()
-    driving_license_tractor = models.BooleanField()
+    preferred_area = models.CharField(
+        max_length=20, choices=PREFERRED_AREA_CHOICES, default="Not Determined", null=True
+    )
+    carrying_weapon = models.BooleanField(null=True)
+    driving_license_tractor = models.BooleanField(null=True)
 
     def save(self, *args, **kwargs):
         choice = self.preferred_area
@@ -108,7 +110,14 @@ class EmergencyCall(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     STATUSES = [("Pending", "Pending"), ("Resolved", "Resolved")]
     status = models.CharField(max_length=20, choices=STATUSES, default="Pending")
+    status = models.CharField(max_length=20, default="Pending", editable=False)
     emergency_types = models.ManyToManyField(EmergencyType, related_name="emergency_calls")
+
+    def save(self, *args, **kwargs):
+        # Set the status to "Pending" if it's not already set
+        if not self.status:
+            self.status = "Pending"
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Emergency Call by {self.user.name}"

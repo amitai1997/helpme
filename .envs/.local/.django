@@ -25,3 +25,4 @@ VIRTUAL_PORT=8001
 # Django
 # ------------------------------------------------------------------------------
 DJANGO_USE_INOTIFY=true
+DJANGO_API_KEY = 'cffd2d716067e53462c1d37439ae20575bc8994d992b00da7abe6e325838baff'

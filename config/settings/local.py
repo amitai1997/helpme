@@ -13,6 +13,11 @@ SECRET_KEY = env(
 # https://docs.djangoproject.com/en/dev/ref/settings/#allowed-hosts
 ALLOWED_HOSTS = ["localhost", "0.0.0.0", "127.0.0.1", "helpme.co.il"]
 
+API_KEY = env(
+    "DJANGO_API_KEY",
+    default="d431883e5ef16c757634bf90e8b0c36be6d0c64f0f62f51ea9ade88c6fe49f79",
+)
+
 # CACHES
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#caches

@@ -45,6 +45,7 @@ def find_matching_volunteers(emergency_call):
         .filter(distance__lte=100 * 1000, skills__in=required_skills)  # 100 km in meters  # Filter by shared skills
         .annotate(skill_count=Count("skills"))  # Count the number of shared skills
         .filter(skill_count__gt=0)  # Filter volunteers with at least one shared skill
+        .filter(availability_status=True)
     )
 
     # Serialize the matched volunteers to JSON
