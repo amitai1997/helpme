@@ -1,3 +1,4 @@
+# tasks.py
 import logging
 from time import sleep
 
@@ -14,18 +15,40 @@ logger = logging.getLogger(__name__)
 
 @shared_task
 def process_emergency_call(emergency_call_id):
-    emergency_call = EmergencyCall.objects.get(id=emergency_call_id)
+    """
+    Process an emergency call asynchronously.
 
-    result = (
-        find_matching_volunteers.s(EmergencyCall.to_json(emergency_call))
-        | send_notifications.s(emergency_call.id)
-        | send_notification_email.s(emergency_call.id)
-    )()
-    return result
+    Args:
+        emergency_call_id (int): The ID of the emergency call to process.
+
+    Returns:
+        Any: Result of the processing.
+    """
+    try:
+        emergency_call = EmergencyCall.objects.get(id=emergency_call_id)
+
+        result = (
+            find_matching_volunteers.s(EmergencyCall.to_json(emergency_call))
+            | send_notifications.s(emergency_call.id)
+            | send_notification_email.s(emergency_call.id)
+        )()
+        return result
+    except Exception as e:
+        logger.error(f"Error processing emergency call: {e}")
+        return None
 
 
 @shared_task
 def find_matching_volunteers(emergency_call_json):
+    """
+    Find matching volunteers for an emergency call.
+
+    Args:
+        emergency_call_json (str): JSON representation of the emergency call.
+
+    Returns:
+        str: JSON representation of matching volunteers.
+    """
     try:
         emergency_call = EmergencyCall.from_json(emergency_call_json)
 
@@ -46,16 +69,26 @@ def find_matching_volunteers(emergency_call_json):
         # Serialize the matched volunteers to JSON
         matching_volunteers_json = serializers.serialize("json", matched_volunteers)
         return matching_volunteers_json
-
     except Exception as e:
-        logger.error(e)
-        return None  #
+        logger.error(f"Error finding matching volunteers: {e}")
+        return None
 
 
 @shared_task()
 def send_notifications(matching_volunteers_json, emergency_call_id):
-    emergency_call = EmergencyCall.objects.get(id=emergency_call_id)
+    """
+    Send notifications to matching volunteers.
+
+    Args:
+        matching_volunteers_json (str): JSON representation of matching volunteers.
+        emergency_call_id (int): The ID of the emergency call.
+
+    Returns:
+        str: JSON representation of matching users.
+    """
     try:
+        emergency_call = EmergencyCall.objects.get(id=emergency_call_id)
+
         # Deserialize JSON data to obtain matching volunteer objects
         matching_volunteers_data = serializers.deserialize("json", matching_volunteers_json, ignorenonexistent=True)
         matching_volunteers = [item.object for item in matching_volunteers_data]
@@ -74,19 +107,28 @@ def send_notifications(matching_volunteers_json, emergency_call_id):
 
         matching_users_json = serializers.serialize("json", matching_users)
         return matching_users_json
-
     except Exception as e:
-        logger.error(e)
-        return None  # Return None or another error indicator
+        logger.error(f"Error sending notifications: {e}")
+        return None
 
 
 @shared_task()
 def send_notification_email(matching_users_json, emergency_call_id):
-    emergency_call = EmergencyCall.objects.get(id=emergency_call_id)
-    matching_users_data = serializers.deserialize("json", matching_users_json, ignorenonexistent=True)
-    matching_users = [item.object for item in matching_users_data]
+    """
+    Send email notifications to matching users.
 
+    Args:
+        matching_users_json (str): JSON representation of matching users.
+        emergency_call_id (int): The ID of the emergency call.
+
+    Returns:
+        dict: A dictionary indicating the result of the email notifications.
+    """
     try:
+        emergency_call = EmergencyCall.objects.get(id=emergency_call_id)
+        matching_users_data = serializers.deserialize("json", matching_users_json, ignorenonexistent=True)
+        matching_users = [item.object for item in matching_users_data]
+
         # Send notification emails to matching volunteers
         for user in matching_users:
             # Simulate an expensive operation that takes 7 seconds
@@ -102,8 +144,7 @@ def send_notification_email(matching_users_json, emergency_call_id):
             )
 
         # Return a success message if the email is sent successfully
-        return {"success": True, "message": "Email sent successfully."}
-
+        return {"success": True, "message": "Email sent successfully"}
     except Exception as e:
-        logger.error(e)
+        logger.error(f"Error sending email notifications: {e}")
         return None
