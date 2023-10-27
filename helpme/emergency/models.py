@@ -13,55 +13,10 @@ class Profile(models.Model):
     GENDERS = [("Male", "Male"), ("Female", "Female")]
     gender = models.CharField(max_length=10, choices=GENDERS, null=True)
     date_of_birth = models.DateField(null=True)
-    city = models.CharField(max_length=100, null=True)
-    PREFERRED_AREA_CHOICES = [
-        ("North", "North"),
-        ("South", "South"),
-        ("Center", "Center"),
-        ("Emek", "Emek"),
-        ("Sharon", "Sharon"),
-        ("Shfela", "Shfela"),
-        ("Jerusalem", "Jerusalem"),
-        ("Valley", "Valley"),
-        ("Not Determined", "Not Determined"),
-    ]
-    preferred_area = models.CharField(
-        max_length=20, choices=PREFERRED_AREA_CHOICES, default="Not Determined", null=True
-    )
-    carrying_weapon = models.BooleanField(null=True)
-    driving_license_tractor = models.BooleanField(null=True)
-
-    def save(self, *args, **kwargs):
-        choice = self.preferred_area
-        if not any(choice in _tuple for _tuple in self.PREFERRED_AREA_CHOICES):
-            raise ValueError('Invalid "preferred_area" choice.')
-        super().save(*args, **kwargs)
+    address = models.CharField(max_length=100, null=True)
 
     def __str__(self):
         return f"Profile for {self.user.name}"
-
-    class Meta:
-        constraints = [
-            models.CheckConstraint(
-                check=models.Q(
-                    preferred_area__in=[
-                        choice
-                        for choice in [
-                            "North",
-                            "South",
-                            "Center",
-                            "Emek",
-                            "Sharon",
-                            "Shfela",
-                            "Jerusalem",
-                            "Valley",
-                            "Not Determined",
-                        ]
-                    ]
-                ),
-                name="valid_preferred_area",
-            )
-        ]
 
 
 class EmergencyType(models.Model):
@@ -155,14 +110,59 @@ class RescueTeam(models.Model):
 
 
 class Volunteer(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     location = gis_models.PointField(geography=True, null=True, blank=True)
-    skills = models.ManyToManyField(EmergencyType, related_name="skilled_volunteers")
+    skills = models.ManyToManyField(EmergencyType, related_name="skilled_volunteers", null=True)
     availability_status = models.BooleanField(default=True)
     contact_information = models.TextField()
+    PREFERRED_AREA_CHOICES = [
+        ("North", "North"),
+        ("South", "South"),
+        ("Center", "Center"),
+        ("Emek", "Emek"),
+        ("Sharon", "Sharon"),
+        ("Shfela", "Shfela"),
+        ("Jerusalem", "Jerusalem"),
+        ("Valley", "Valley"),
+        ("Not Determined", "Not Determined"),
+    ]
+    preferred_area = models.CharField(
+        max_length=20, choices=PREFERRED_AREA_CHOICES, default="Not Determined", null=True
+    )
+    carrying_weapon = models.BooleanField(null=True)
+    driving_license = models.BooleanField(null=True)
+
+    def save(self, *args, **kwargs):
+        choice = self.preferred_area
+        if not any(choice in _tuple for _tuple in self.PREFERRED_AREA_CHOICES):
+            raise ValueError('Invalid "preferred_area" choice.')
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Volunteer: {self.user.name}"
+
+    class Meta:
+        constraints = [
+            models.CheckConstraint(
+                check=models.Q(
+                    preferred_area__in=[
+                        choice
+                        for choice in [
+                            "North",
+                            "South",
+                            "Center",
+                            "Emek",
+                            "Sharon",
+                            "Shfela",
+                            "Jerusalem",
+                            "Valley",
+                            "Not Determined",
+                        ]
+                    ]
+                ),
+                name="valid_preferred_area",
+            )
+        ]
 
 
 class UserLocation(models.Model):

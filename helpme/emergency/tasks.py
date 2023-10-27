@@ -42,7 +42,7 @@ def find_matching_volunteers(emergency_call):
     # Calculate the distance between each volunteer's location and the required location
     matched_volunteers = (
         Volunteer.objects.annotate(distance=Distance("location", required_location))
-        .filter(distance__lte=100 * 1000, skills__in=required_skills)  # 100 km in meters  # Filter by shared skills
+        .filter(distance__lte=100 * 10000, skills__in=required_skills)  # 100 km in meters  # Filter by shared skills
         .annotate(skill_count=Count("skills"))  # Count the number of shared skills
         .filter(skill_count__gt=0)  # Filter volunteers with at least one shared skill
         .filter(availability_status=True)
@@ -61,7 +61,7 @@ def send_notifications(matching_volunteers_json, emergency_call_json):
     matching_volunteers = [item.object for item in matching_volunteers_data]
 
     # Extract user objects from matching volunteers
-    matching_users = [volunteer.user for volunteer in matching_volunteers]
+    matching_users = [volunteer.profile.user for volunteer in matching_volunteers]
 
     # Deserialize the emergency call JSON to get the emergency call object
     emergency_call = EmergencyCall.from_json(emergency_call_json)
@@ -77,7 +77,7 @@ def send_notifications(matching_volunteers_json, emergency_call_json):
 
     # Send notification emails to matching volunteers
     for volunteer in matching_volunteers:
-        send_notification_email.delay(volunteer.user.email, emergency_call_json)
+        send_notification_email.delay(volunteer.profile.user.email, emergency_call_json)
 
 
 @shared_task()
