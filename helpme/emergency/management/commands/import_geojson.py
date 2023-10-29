@@ -19,17 +19,28 @@ class Command(BaseCommand):
             features = data["features"]
 
             for feature in features:
-                geometry = GEOSGeometry(json.dumps(feature["geometry"]))
+                geometry_data = feature["geometry"]
                 feature_id = feature["id"]
 
-                # Check if a feature with the same id already exists
-                existing_feature, created = GeoJSONFeature.objects.get_or_create(feature_id=feature_id)
+                try:
+                    # Attempt to create a GEOSGeometry object
+                    geometry = GEOSGeometry(json.dumps(geometry_data))
+                except Exception as e:
+                    self.stderr.write(
+                        self.style.ERROR(
+                            f"Skipping feature with feature_id {feature_id} due to invalid geometry: {str(e)}"
+                        )
+                    )
+                    continue
 
-                # If the feature with the same id doesn't exist, create it
-                if created:
+                # Check if a feature with the same id already exists
+                existing_feature = GeoJSONFeature.objects.filter(feature_id=feature_id).first()
+
+                if existing_feature:
+                    # If the feature with the same id exists, update its data
                     # Extract properties
                     properties = feature["properties"]
-                    iso = properties["iso"]
+                    iso = properties.get("iso")
                     name_0 = properties.get("name_0")
                     id_1 = properties.get("id_1")
                     name_1 = properties.get("name_1")
@@ -41,7 +52,38 @@ class Command(BaseCommand):
                     nl_name_1 = properties.get("nl_name_1")
                     varname_1 = properties.get("varname_1")
 
-                    # Create a GeoJSONFeature object with the parsed data
+                    # Update the existing feature with the new data
+                    existing_feature.geometry = geometry
+                    existing_feature.iso = iso
+                    existing_feature.name_0 = name_0
+                    existing_feature.id_1 = id_1
+                    existing_feature.name_1 = name_1
+                    existing_feature.hasc_1 = hasc_1
+                    existing_feature.ccn_1 = ccn_1
+                    existing_feature.cca_1 = cca_1
+                    existing_feature.type_1 = type_1
+                    existing_feature.engtype_1 = engtype_1
+                    existing_feature.nl_name_1 = nl_name_1
+                    existing_feature.varname_1 = varname_1
+
+                    existing_feature.save()
+                else:
+                    # If the feature doesn't exist, create a new feature
+                    # Extract properties
+                    properties = feature["properties"]
+                    iso = properties.get("iso")
+                    name_0 = properties.get("name_0")
+                    id_1 = properties.get("id_1")
+                    name_1 = properties.get("name_1")
+                    hasc_1 = properties.get("hasc_1")
+                    ccn_1 = properties.get("ccn_1")
+                    cca_1 = properties.get("cca_1")
+                    type_1 = properties.get("type_1")
+                    engtype_1 = properties.get("engtype_1")
+                    nl_name_1 = properties.get("nl_name_1")
+                    varname_1 = properties.get("varname_1")
+
+                    # Create a new feature with the parsed data
                     geojson_feature = GeoJSONFeature(
                         geometry=geometry,
                         feature_id=feature_id,

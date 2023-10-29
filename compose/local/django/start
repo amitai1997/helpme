@@ -12,4 +12,8 @@ python -Xfrozen_modules=off -m debugpy --listen 0.0.0.0:5678 manage.py runserver
 sleep 5
 
 python manage.py migrate
+
+# python manage.py import_geojson ${DJANGO_ISRAEL_MAP_JSON}
+python manage.py import_geojson /app/helpme/static/maps/stanford-ch107xc0728-geojson.json
+
 exec uvicorn config.asgi:application --host 0.0.0.0 --reload --reload-include '*.html'
