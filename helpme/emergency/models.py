@@ -112,7 +112,7 @@ class RescueTeam(models.Model):
 class Volunteer(models.Model):
     profile = models.ForeignKey(Profile, on_delete=models.CASCADE)
     location = gis_models.PointField(geography=True, null=True, blank=True)
-    skills = models.ManyToManyField(EmergencyType, related_name="skilled_volunteers", null=True)
+    skills = models.ManyToManyField(EmergencyType, related_name="skilled_volunteers")
     availability_status = models.BooleanField(default=True)
     contact_information = models.TextField()
     PREFERRED_AREA_CHOICES = [
@@ -172,3 +172,23 @@ class UserLocation(models.Model):
 
     def __str__(self):
         return f"Location of {self.user.name}"
+
+
+class GeoJSONFeature(models.Model):
+    # Define the fields for your GeoJSON feature
+    geometry = gis_models.MultiPolygonField()
+    feature_id = models.CharField(max_length=100, null=True)
+    iso = models.CharField(max_length=3, null=True)
+    name_0 = models.CharField(max_length=100, null=True)
+    id_1 = models.IntegerField(null=True)
+    name_1 = models.CharField(max_length=100, null=True)
+    hasc_1 = models.CharField(max_length=10, null=True, blank=True)
+    ccn_1 = models.IntegerField(null=True)
+    cca_1 = models.CharField(max_length=10, null=True, blank=True)
+    type_1 = models.CharField(max_length=100, null=True)
+    engtype_1 = models.CharField(max_length=100, null=True)
+    nl_name_1 = models.CharField(max_length=100, null=True, blank=True)
+    varname_1 = models.CharField(max_length=100, null=True, blank=True)
+
+    def __str__(self):
+        return self.id

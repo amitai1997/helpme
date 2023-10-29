@@ -18,3 +18,6 @@ class SendEmailView(View):
             return JsonResponse({"message": "Email will be sent in the background.", "task_id": result.id})
         except Exception as e:
             return JsonResponse({"error": str(e)}, status=500)
+
+
+#
