@@ -14,10 +14,11 @@ from helpme.emergency.models import (
 
 class LocationPointField(serializers.Field):
     def to_internal_value(self, data):
-        # Parse the location string and create a Point object
         try:
             latitude, longitude = map(float, data.split(","))
-            return Point(longitude, latitude)  # Order is (x, y)
+            if not (-90 <= latitude <= 90) or not (-180 <= longitude <= 180):
+                raise serializers.ValidationError("Invalid latitude or longitude values.")
+            return Point(longitude, latitude)
         except (ValueError, AttributeError):
             raise serializers.ValidationError("Invalid location format.")
 
