@@ -80,6 +80,7 @@ DJANGO_APPS = [
     "django.contrib.admin",
     "django.forms",
     "django.contrib.gis",
+    "django_admin_geomap",
 ]
 THIRD_PARTY_APPS = [
     "crispy_forms",
@@ -92,6 +93,7 @@ THIRD_PARTY_APPS = [
     "rest_framework.authtoken",
     "corsheaders",
     "drf_spectacular",
+    "leaflet",
 ]
 
 LOCAL_APPS = [

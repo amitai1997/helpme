@@ -80,6 +80,10 @@ class EmergencyCall(models.Model):
     def to_json(self):
         return serializers.serialize("json", [self])
 
+    @property
+    def geomap_location(self):
+        return str(self.location)
+
     @classmethod
     def from_json(cls, json_data):
         for obj in serializers.deserialize("json", json_data):

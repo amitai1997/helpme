@@ -10,7 +10,7 @@ from helpme.emergency.api.views import (
     UserLocationViewSet,
     VolunteerViewSet,
 )
-from helpme.emergency.views import SendEmailView
+from helpme.emergency.views import CustomAdminView, SendEmailView
 
 app_name = "emergency"
 
@@ -26,5 +26,6 @@ router.register(r"emergency-type", EmergencyTypeViewSet)
 urlpatterns = [
     # ... your other URL patterns ...
     path("send-email/", SendEmailView.as_view(), name="send_email"),
+    path("admin/custom/", CustomAdminView),
     path("", include(router.urls)),
 ]

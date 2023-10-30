@@ -1,6 +1,9 @@
+from django.contrib.admin.views.decorators import staff_member_required
 from django.http import JsonResponse
+from django.shortcuts import render
 from rest_framework.views import View
 
+from helpme.emergency.models import EmergencyCall
 from helpme.emergency.tasks import send_notification_email
 
 
@@ -21,3 +24,12 @@ class SendEmailView(View):
 
 
 #
+@staff_member_required
+def CustomAdminView(request):
+    # Fetch all EmergencyCall objects
+    emergency_calls = EmergencyCall.objects.all()
+    return render(
+        request,
+        "admin/custom_emergencycall_view.html",
+        {"emergency_calls": emergency_calls},
+    )

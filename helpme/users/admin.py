@@ -3,7 +3,9 @@ from django.contrib import admin
 from django.contrib.auth import admin as auth_admin
 from django.contrib.auth import decorators, get_user_model
 from django.utils.translation import gettext_lazy as _
+from leaflet.admin import LeafletGeoAdmin
 
+from helpme.emergency.models import EmergencyCall
 from helpme.users.forms import UserAdminChangeForm, UserAdminCreationForm
 
 User = get_user_model()
@@ -47,3 +49,16 @@ class UserAdmin(auth_admin.UserAdmin):
             },
         ),
     )
+
+
+@admin.register(EmergencyCall)
+class LocationAdmin(LeafletGeoAdmin):
+    list_display = ("title", "location")
+    map_height = "500px"
+    map_width = "100%"
+    list_max_show_all = 5000
+
+
+# @admin.register(EmergencyCall)
+# class CustomEmergencyCallAdmin(admin.ModelAdmin):
+#     list_display = ('title', 'location')
