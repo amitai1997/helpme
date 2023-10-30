@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
     <title>Custom Emergency Call Map</title>
     {% load static %}
@@ -11,15 +11,9 @@
           type="text/css"
           href="{% static 'leaflet/leaflet.css' %}" />
     <script type="text/javascript" src="{% static 'leaflet/leaflet.js' %}"></script>
-    <style>
-      #map {
-        width: 100%;
-        height: 500px;
-      }
-    </style>
   </head>
   <body>
-    <div id="map"></div>
+    <div id="map" style="width: 100%; height: 500px;"></div>
     <script type="text/javascript">
       var map = L.map('map').setView([{
         {
@@ -49,8 +43,7 @@
         }
       }]).addTo(map).bindPopup("{{ emergency_call.title }}");
       {
-        %
-        endfor %
+        % endfor %
       }
     </script>
   </body>
