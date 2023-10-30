@@ -1,13 +1,16 @@
 # tasks.py
 import logging
+import random
 from time import sleep
 
 from celery import shared_task
 from django.contrib.gis.db.models.functions import Distance
+from django.contrib.gis.geos import Point
 from django.core import serializers
 from django.core.mail import send_mail
 from django.db.models import Count
 
+from helpme.emergency.api.views import validate_location
 from helpme.emergency.models import EmergencyCall, Notification, Volunteer
 
 logger = logging.getLogger(__name__)
@@ -148,3 +151,25 @@ def send_notification_email(matching_users_json, emergency_call_id):
     except Exception as e:
         logger.error(f"Error sending email notifications: {e}")
         return None
+
+
+@shared_task
+def update_locations():
+    volunteers = Volunteer.objects.all()
+
+    for volunteer in volunteers:
+        # Simulate random location updates
+        new_location = Point(
+            x=volunteer.location.x + random.uniform(-0.11, 0.11),
+            y=volunteer.location.y + random.uniform(-0.11, 0.11),
+        )
+
+        # Call the location validation function
+        error_message = "Invalid location"
+        response = validate_location(None, new_location, error_message)
+        if response:
+            # Invalid location, handle the response as needed (e.g., log it)
+            continue
+
+        volunteer.location = new_location
+        volunteer.save()

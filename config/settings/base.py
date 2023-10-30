@@ -353,3 +353,9 @@ SPECTACULAR_SETTINGS = {
 }
 # Your stuff...
 # ------------------------------------------------------------------------------
+CELERY_BEAT_SCHEDULE = {
+    "simulate_location_changes": {
+        "task": "helpme.emergency.tasks.update_locations",
+        "schedule": 10,  # Run every X seconds (adjust as needed)
+    },
+}
