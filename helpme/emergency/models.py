@@ -8,8 +8,8 @@ from helpme.users.models import User
 
 
 class Profile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    identification_number = models.CharField(max_length=20, null=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, unique=True)
+    identification_number = models.CharField(max_length=20, null=True, unique=True)
     GENDERS = [("Male", "Male"), ("Female", "Female")]
     gender = models.CharField(max_length=10, choices=GENDERS, null=True)
     date_of_birth = models.DateField(null=True)

@@ -1,3 +1,6 @@
+import re
+from datetime import datetime
+
 from rest_framework import status, viewsets
 from rest_framework.response import Response
 
@@ -93,6 +96,41 @@ class UserLocationViewSet(viewsets.ModelViewSet):
 class ProfileViewSet(viewsets.ModelViewSet):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
+
+    def create(self, request, *args, **kwargs):
+        # Extract the date string from the request data
+        original_date_string = request.data.get("date_of_birth")
+
+        if original_date_string:
+            # Extract the relevant parts of the date string
+            pattern = r"\w{3} (\w{3} \d{2} \d{4}) \d{2}:\d{2}:\d{2}"
+            match = re.search(pattern, original_date_string)
+
+            if match:
+                formatted_date_string = match.group(1)
+                try:
+                    # Parse the extracted date string
+                    parsed_date = datetime.strptime(formatted_date_string, "%b %d %Y").date()
+
+                    # Replace the date_string in the request data with the formatted date
+                    request.data["date_of_birth"] = parsed_date.strftime("%Y-%m-%d")
+
+                    # Use the serializer to create the Profile object
+                    serializer = self.get_serializer(data=request.data)
+                    serializer.is_valid(raise_exception=True)
+                    self.perform_create(serializer)
+
+                    headers = self.get_success_headers(serializer.data)
+                    return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+                except ValueError:
+                    return Response(
+                        {"date_string": "Invalid date format. Use MMM DD YYYY format."},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+            else:
+                return Response({"date_string": "Invalid date string format."}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({"date_string": "Date string is required."}, status=status.HTTP_400_BAD_REQUEST)
 
 
 # Emergencytype view

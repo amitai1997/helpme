@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from rest_framework.views import View
 
-from helpme.emergency.models import EmergencyCall
+from helpme.emergency.models import Volunteer
 from helpme.emergency.tasks import send_notification_email
 
 
@@ -27,9 +27,17 @@ class SendEmailView(View):
 @staff_member_required
 def CustomAdminView(request):
     # Fetch all EmergencyCall objects
-    emergency_calls = EmergencyCall.objects.all()
+    volunteers = Volunteer.objects.all()
     return render(
         request,
-        "admin/custom_emergencycall_view.html",
-        {"emergency_calls": emergency_calls},
+        # TODO change to relative location
+        "admin/display_all_volunteers.html",
+        {"volunteers": volunteers},
     )
+
+
+def view_volunteer_location(request, volunteer_id):
+    volunteer = Volunteer.objects.get(pk=volunteer_id)
+    # Add code to handle displaying the location on the map
+    # You can pass the volunteer's location data to your template
+    return render(request, "admin/volunteer_location.html", {"volunteer": volunteer})
