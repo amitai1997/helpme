@@ -10,3 +10,8 @@
 venv
 .git
 .envs/
+
+# custom edit
+**/bin
+**/obj
+**/node_modules

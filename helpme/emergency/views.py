@@ -1,4 +1,5 @@
 from django.contrib.admin.views.decorators import staff_member_required
+from django.core import serializers
 from django.http import JsonResponse
 from django.shortcuts import render
 from rest_framework.views import View
@@ -23,7 +24,17 @@ class SendEmailView(View):
             return JsonResponse({"error": str(e)}, status=500)
 
 
-#
+@staff_member_required
+def UpdateVolunteersView(request):
+    # Fetch all EmergencyCall objects
+    volunteers = Volunteer.objects.all()
+
+    # Serialize the queryset to JSON
+    volunteers_json = serializers.serialize("json", volunteers)
+
+    return JsonResponse({"volunteers": volunteers_json}, safe=False)
+
+
 @staff_member_required
 def CustomAdminView(request):
     # Fetch all EmergencyCall objects
@@ -38,6 +49,7 @@ def CustomAdminView(request):
 
 def view_volunteer_location(request, volunteer_id):
     volunteer = Volunteer.objects.get(pk=volunteer_id)
+
     # Add code to handle displaying the location on the map
     # You can pass the volunteer's location data to your template
     return render(request, "admin/volunteer_location.html", {"volunteer": volunteer})

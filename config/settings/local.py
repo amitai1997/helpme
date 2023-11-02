@@ -80,3 +80,10 @@ INSTALLED_APPS += ["django_extensions"]  # noqa: F405
 CELERY_TASK_EAGER_PROPAGATES = True
 # Your stuff...
 # ------------------------------------------------------------------------------
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8001",  # Add the origins you want to allow
+]
+CORS_ALLOW_METHODS = [
+    "GET",
+]
