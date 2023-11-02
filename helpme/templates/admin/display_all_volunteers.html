@@ -17,61 +17,48 @@
 <body>
     <div id="map" style="width: 100%; height: 500px;"></div>
     <script type="text/javascript">
-        var map = L.map('map').setView([0, 0], 2);  // Initialize the map with a default view
-    
+        var map = L.map('map').setView([{{ volunteers.0.location.y }}, {{ volunteers.0.location.x }}], 7);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
         }).addTo(map);
-    
-        // Function to add markers to the map
-        function addMarkers(volunteers) {
-            volunteers.forEach(function (volunteer) {
-                var popupContent = '<table>' +
-                    '<tr><td>Name:</td><td>{{ volunteer.profile.user.name }}</td></tr>' +
-                    '<tr><td>Email:</td><td>{{ volunteer.profile.user.email }}</td></tr>' +
-                    '<tr><td>Available:</td><td>{{ volunteer.availability_status }}</td></tr>' +
-                    '<tr><td>Phone:</td><td>{{ volunteer.contact_information }}</td></tr>' +
-                    '<tr><td>Weapon:</td><td>{{ volunteer.carrying_weapon }}</td></tr>' +
-                    '<tr><td>License:</td><td>{{ volunteer.driving_license }}</td></tr>' +
-                    // Add other volunteer information as needed
-                    '</table>';
-    
-                L.marker([volunteer.fields.location.y, volunteer.fields.location.x]).addTo(map).bindPopup(popupContent);
-            });
-        }
-    
-        // Function to update the map with JSON data
+
+        {% for volunteer in volunteers %}
+            var popupContent = '<table>' +
+                '<tr><td>Name:</td><td id="name{{ volunteer.pk }}">{{ volunteer.profile.user.name }}</td></tr>' +
+                '<tr><td>Email:</td><td id="email{{ volunteer.pk }}">{{ volunteer.profile.user.email }}</td></tr>' +
+                '<tr><td>Available:</td><td id="availability{{ volunteer.pk }}">{{ volunteer.availability_status }}</td></tr>' +
+                '<tr><td>Phone:</td><td id="phone{{ volunteer.pk }}">{{ volunteer.contact_information }}</td></tr>' +
+                '<tr><td>Weapon:</td><td id="weapon{{ volunteer.pk }}">{{ volunteer.carrying_weapon }}</td></tr>' +
+                '<tr><td>License:</td><td id="license{{ volunteer.pk }}">{{ volunteer.driving_license }}</td></tr>' +
+                '</table>';
+
+            L.marker([{{ volunteer.location.y }}, {{ volunteer.location.x }}], {volunteerPk: {{ volunteer.pk }}}).addTo(map).bindPopup(popupContent);
+        {% endfor %}
+
+        // Function to update specific fields with JSON data
         function updateVolunteers() {
             $.ajax({
                 url: 'http://localhost:8001/emergency/volunteers/update/',
                 type: 'GET',
                 dataType: 'json',
                 success: function(data) {
-                    // Parse the JSON string into an array of objects
                     var volunteers = JSON.parse(data.volunteers);
-        
-                    // Clear existing markers
-                    map.eachLayer(function (layer) {
-                        if (layer instanceof L.Marker) {
-                            map.removeLayer(layer);
-                        }
-                    });
-        
-                    // Add new markers for the updated volunteers
+
                     volunteers.forEach(function (volunteer) {
+                        // Update specific fields based on the volunteer's primary key (pk)
+                        $('#availability' + volunteer.pk).text(volunteer.fields.availability_status);
+                        $('#phone' + volunteer.pk).text(volunteer.fields.contact_information);
+                        $('#weapon' + volunteer.pk).text(volunteer.fields.carrying_weapon);
+                        $('#license' + volunteer.pk).text(volunteer.fields.driving_license);
+
                         // Extract the latitude and longitude from the location field
                         var locationString = volunteer.fields.location;
                         var coordinates = locationString.match(/\(([^)]+)\)/)[1].split(' ');
                         var latitude = parseFloat(coordinates[1]);
                         var longitude = parseFloat(coordinates[0]);
-        
-                        var popupContent = '<table>' +
-                            '<tr><td>Name:</td><td>' + volunteer.fields.name + '</td></tr>' +
-                            '<tr><td>Email:</td><td>' + volunteer.fields.email + '</td></tr>' +
-                            // Add other volunteer information as needed
-                            '</table>';
-        
-                        L.marker([latitude, longitude]).addTo(map).bindPopup(popupContent);
+
+                        // Update the marker's position on the map
+                        updateMarkerPosition(volunteer.pk, latitude, longitude);
                     });
                 },
                 error: function(xhr, status, error) {
@@ -79,10 +66,21 @@
                 }
             });
         }
-    
-        // Call the updateMap function to initially load markers
+
+        function updateMarkerPosition(volunteerPk, newLatitude, newLongitude) {
+            // Find the existing marker and update its position
+            map.eachLayer(function (layer) {
+                if (layer instanceof L.Marker) {
+                    if (layer.options.volunteerPk === volunteerPk) {
+                        layer.setLatLng([newLatitude, newLongitude]);
+                    }
+                }
+            });
+        }
+
+        // Call the updateVolunteers function to initially load markers and data
         updateVolunteers();
-    
+
         // Automatically update volunteers at a regular interval (e.g., every 60 seconds)
         setInterval(updateVolunteers, 4000);  // Adjust the interval as needed
     </script>

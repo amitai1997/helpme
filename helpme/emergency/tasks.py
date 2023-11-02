@@ -155,13 +155,14 @@ def send_notification_email(matching_users_json, emergency_call_id):
 
 @shared_task
 def update_locations():
+    logging.info("Update locations task is running")
     volunteers = Volunteer.objects.all()
 
     for volunteer in volunteers:
         # Simulate random location updates
         new_location = Point(
-            x=volunteer.location.x + random.uniform(-0.11, 0.11),
-            y=volunteer.location.y + random.uniform(-0.11, 0.11),
+            x=volunteer.location.x + random.uniform(-0.01, 0.01),
+            y=volunteer.location.y + random.uniform(-0.01, 0.01),
         )
 
         # Call the location validation function
@@ -173,3 +174,5 @@ def update_locations():
 
         volunteer.location = new_location
         volunteer.save()
+
+    logging.info("Update locations task completed")
