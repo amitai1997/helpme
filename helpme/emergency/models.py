@@ -1,10 +1,8 @@
-from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.gis.db import models as gis_models
 from django.core import serializers
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
-from star_ratings.models import Rating
 
 from helpme.users.models import User
 
@@ -137,7 +135,6 @@ class Volunteer(models.Model):
     )
     carrying_weapon = models.BooleanField(null=True)
     driving_license = models.BooleanField(null=True)
-    ratings = GenericRelation(Rating, related_query_name="volunteer_ratings")
 
     def save(self, *args, **kwargs):
         choice = self.preferred_area
@@ -198,4 +195,4 @@ class GeoJSONFeature(models.Model):
     varname_1 = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
-        return self.id
+        return str(self.id)
