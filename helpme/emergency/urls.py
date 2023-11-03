@@ -10,7 +10,13 @@ from helpme.emergency.api.views import (
     UserLocationViewSet,
     VolunteerViewSet,
 )
-from helpme.emergency.views import CustomAdminView, SendEmailView, UpdateVolunteersView, view_volunteer_location
+from helpme.emergency.views import (
+    CustomAdminView,
+    UpdateVolunteersView,
+    rate_volunteer,
+    view_volunteer_location,
+    volunteer_rating_info,
+)
 
 app_name = "emergency"
 
@@ -24,9 +30,15 @@ router.register(r"profiles", ProfileViewSet)
 router.register(r"emergency-type", EmergencyTypeViewSet)
 
 urlpatterns = [
-    path("send-email/", SendEmailView.as_view(), name="send_email"),
     path("volunteers/map/", CustomAdminView, name="volunteers_map"),
     path("volunteers/update/", UpdateVolunteersView, name="updated_volunteers"),
     path("view_volunteer_location/<int:volunteer_id>/", view_volunteer_location, name="view_volunteer_location"),
+    path("ratings/", include("star_ratings.urls", namespace="ratings")),
+    # URL for rating a volunteer
+    path("volunteer/<int:volunteer_id>/rate/", rate_volunteer, name="rate_volunteer"),
+    path("volunteer/<int:volunteer_id>/info/", volunteer_rating_info, name="volunteer_detail"),
     path("", include(router.urls)),
 ]
+
+# if settings.DEBUG:
+#     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

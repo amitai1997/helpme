@@ -95,7 +95,7 @@ THIRD_PARTY_APPS = [
     "corsheaders",
     "drf_spectacular",
     "leaflet",
-    "djangoratings",
+    "star_ratings",
 ]
 
 LOCAL_APPS = [

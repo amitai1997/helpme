@@ -1,27 +1,16 @@
+import json
+
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.contenttypes.models import ContentType
 from django.core import serializers
+from django.core.exceptions import ObjectDoesNotExist
+from django.db import models
+from django.forms import ValidationError
 from django.http import JsonResponse
 from django.shortcuts import render
-from rest_framework.views import View
+from star_ratings.models import Rating, UserRating
 
 from helpme.emergency.models import Volunteer
-from helpme.emergency.tasks import send_notification_email
-
-
-class SendEmailView(View):
-    def get(self, request):
-        """Enqueue a task to send an email when the feedback form has been submitted."""
-        message = request.GET.get("message", "")
-        email_address = request.GET.get("email_address", "")
-
-        if not email_address:
-            return JsonResponse({"error": "email_address is required."}, status=400)
-
-        try:
-            result = send_notification_email.delay(email_address, message)
-            return JsonResponse({"message": "Email will be sent in the background.", "task_id": result.id})
-        except Exception as e:
-            return JsonResponse({"error": str(e)}, status=500)
 
 
 @staff_member_required
@@ -53,3 +42,77 @@ def view_volunteer_location(request, volunteer_id):
     # Add code to handle displaying the location on the map
     # You can pass the volunteer's location data to your template
     return render(request, "admin/volunteer_location.html", {"volunteer": volunteer})
+
+
+def rate_volunteer(request, volunteer_id):
+    if request.method == "POST":
+        try:
+            rating_value = json.loads(request.body).get("rating")
+
+            # Validate rating value
+            rating_value = json.loads(request.body).get("rating")
+            if not (0 <= rating_value <= 5):  # Assuming a rating scale from 0 to 5
+                raise ValidationError("Invalid rating value")
+
+            volunteer = Volunteer.objects.get(id=volunteer_id)
+            user = request.user
+            content_type = ContentType.objects.get_for_model(volunteer)
+
+            # Create a new Rating instance or get an existing one
+            rating, created = Rating.objects.get_or_create(
+                content_type=content_type,
+                object_id=volunteer.id,
+            )
+
+            # Set the rating value
+            rating.rating = rating_value
+            rating.save()
+
+            # Calculate the score for the UserRating based on the Rating
+            user_rating = UserRating(
+                score=rating_value,
+                rating=rating,
+                user=user,
+            )
+            user_rating.save()
+
+            # Return a JSON response indicating success
+            return JsonResponse({"message": "Rating added successfully"})
+
+        except ObjectDoesNotExist:
+            return JsonResponse({"error": "Volunteer not found"}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    # Handle other HTTP methods (e.g., GET) if needed
+    return JsonResponse({"error": "Invalid request method"}, status=405)
+
+
+def volunteer_rating_info(request, volunteer_id):
+    if request.method == "GET":
+        try:
+            volunteer_id = int(volunteer_id)  # Convert to integer
+            volunteer = Volunteer.objects.get(id=volunteer_id)
+
+            # Retrieve all ratings associated with the volunteer
+            ratings = Rating.objects.filter(
+                object_id=volunteer.id,
+            )
+
+            average_rating = ratings.aggregate(average_rating=models.Avg("average"))["average_rating"] or 0
+            total_ratings = ratings.aggregate(average_rating=models.Avg("count"))["average_rating"] or 0
+
+            response_data = {
+                "total_ratings": total_ratings,
+                "average_rating": average_rating,
+            }
+
+            return JsonResponse(response_data)
+
+        except ObjectDoesNotExist:
+            return JsonResponse({"error": "Volunteer not found"}, status=404)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=500)
+
+    # Handle other HTTP methods (e.g., POST) if needed
+    return JsonResponse({"error": "Invalid request method"}, status=405)

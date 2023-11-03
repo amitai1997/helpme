@@ -15,3 +15,8 @@ venv
 **/bin
 **/obj
 **/node_modules
+.vscode
+__pycache__
+*.pyc
+*.pyo
+.pytest_cache
