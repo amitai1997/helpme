@@ -1,5 +1,6 @@
 from django.contrib.gis.geos import Point
 from rest_framework import serializers
+from star_ratings.models import Rating
 
 from helpme.emergency.models import (
     EmergencyCall,
@@ -10,6 +11,12 @@ from helpme.emergency.models import (
     UserLocation,
     Volunteer,
 )
+
+
+class RatingSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Rating
+        fields = "__all__"  # Include all fields from the Rating model
 
 
 class LocationPointField(serializers.Field):
@@ -38,6 +45,7 @@ class EmergencyCallSerializer(serializers.ModelSerializer):
 
 class VolunteerSerializer(serializers.ModelSerializer):
     location = LocationPointField()
+    rating = RatingSerializer()
 
     class Meta:
         model = Volunteer

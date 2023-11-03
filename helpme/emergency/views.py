@@ -1,6 +1,7 @@
 import json
 
 from django.contrib.admin.views.decorators import staff_member_required
+from django.contrib.auth.models import AnonymousUser
 from django.contrib.contenttypes.models import ContentType
 from django.core import serializers
 from django.core.exceptions import ObjectDoesNotExist
@@ -8,9 +9,29 @@ from django.db import models
 from django.forms import ValidationError
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+
+# from rest_framework.renderers import JSONRenderer
 from star_ratings.models import Rating, UserRating
 
+# from helpme.emergency.api.serializers import VolunteerSerializer
 from helpme.emergency.models import Volunteer
+
+# from helpme.emergency.models import User
+
+
+# @staff_member_required
+# def UpdateVolunteersView(request):
+#     # Fetch all EmergencyCall objects and select related ratings
+#     # volunteers = Volunteer.objects.all()
+#     volunteers = Volunteer.objects.select_related('rating').all()
+
+#     # Serialize the queryset using the serializer
+#     serializer = VolunteerSerializer(volunteers, many=True)
+#     serialized_data = JSONRenderer().render(serializer.data)
+
+#     # return JsonResponse({"volunteers": serialized_data}, safe=False)
+#     return JsonResponse(json.dumps(serializer.data), safe=False)
 
 
 @staff_member_required
@@ -52,6 +73,7 @@ def view_volunteer_location(request, volunteer_id):
     return render(request, "admin/volunteer_location.html", {"volunteer": volunteer})
 
 
+@csrf_exempt
 def rate_volunteer(request, volunteer_id):
     if request.method == "POST":
         try:
@@ -64,6 +86,16 @@ def rate_volunteer(request, volunteer_id):
 
             volunteer = Volunteer.objects.get(id=volunteer_id)
             user = request.user
+
+            # Check if the user is anonymous
+            if isinstance(user, AnonymousUser):
+                # Handle anonymous user rating
+
+                # Create a placeholder user for anonymous ratings (if not exists)
+                # placeholder_user, created = User.objects.get_or_create(username="Anonymous User")
+                # user = placeholder_user
+                user = None
+
             content_type = ContentType.objects.get_for_model(volunteer)
 
             # Create a new Rating instance or get an existing one
@@ -87,6 +119,9 @@ def rate_volunteer(request, volunteer_id):
                 user=user,
             )
             user_rating.save()
+
+            # Recalculate the totals, and save.
+            rating.calculate()
 
             # Return a JSON response indicating success
             return JsonResponse({"message": "Rating added successfully"})

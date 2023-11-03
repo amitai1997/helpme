@@ -75,6 +75,7 @@
                         $('#phone' + volunteer.pk).text(volunteer.fields.contact_information);
                         $('#weapon' + volunteer.pk).text(volunteer.fields.carrying_weapon);
                         $('#license' + volunteer.pk).text(volunteer.fields.driving_license);
+                        $('#rating' + volunteer.pk).text(volunteer.rating.average);
 
                         // Extract the latitude and longitude from the location field
                         var locationString = volunteer.fields.location;

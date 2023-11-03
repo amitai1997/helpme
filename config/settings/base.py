@@ -331,6 +331,10 @@ SOCIALACCOUNT_ADAPTER = "helpme.users.adapters.SocialAccountAdapter"
 # https://django-allauth.readthedocs.io/en/latest/forms.html
 SOCIALACCOUNT_FORMS = {"signup": "helpme.users.forms.UserSocialSignupForm"}
 
+# django-star-rating
+# ------------------------------------------------------------------------------
+STAR_RATINGS_ANONYMOUS = True
+
 # django-rest-framework
 # -------------------------------------------------------------------------------
 # django-rest-framework - https://www.django-rest-framework.org/api-guide/settings/

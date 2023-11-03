@@ -137,7 +137,7 @@ class Volunteer(models.Model):
     carrying_weapon = models.BooleanField(null=True)
     driving_license = models.BooleanField(null=True)
     rating = models.ForeignKey(
-        Rating, on_delete=models.CASCADE, related_name="volunteer_rating", null=True, blank=True
+        Rating, on_delete=models.SET_NULL, related_name="volunteer_rating", null=True, blank=True
     )
 
     def save(self, *args, **kwargs):
