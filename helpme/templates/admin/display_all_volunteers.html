@@ -27,24 +27,41 @@
 
         {% for volunteer in volunteers %}
         var popupContent = '<table>' +
-                '<tr><td>ID:</td><td id="ID{{ volunteer.pk }}">{{ volunteer.id }}</td></tr>' +
-                '<tr><td>Name:</td><td id="name{{ volunteer.pk }}">{{ volunteer.profile.user.name }}</td></tr>' +
-                '<tr><td>Email:</td><td id="email{{ volunteer.pk }}">{{ volunteer.profile.user.email }}</td></tr>' +
-                '<tr><td>Available:</td><td id="availability{{ volunteer.pk }}">{{ volunteer.availability_status }}</td></tr>' +
-                '<tr><td>Phone:</td><td id="phone{{ volunteer.pk }}">{{ volunteer.contact_information }}</td></tr>' +
-                '<tr><td>Weapon:</td><td id="weapon{{ volunteer.pk }}">{{ volunteer.carrying_weapon }}</td></tr>' +
-                '<tr><td>License:</td><td id="license{{ volunteer.pk }}">{{ volunteer.driving_license }}</td></tr>' +
-                '<tr><td>Rating:</td><td id="rating{{ volunteer.pk }}">{{ volunteer.ratings.avarage }}</td></tr>' +
-                '</table>'
-
-                console.log("{{ volunteer.average_rating }}")
-            L.marker([{{ volunteer.location.y }}, {{ volunteer.location.x }}], {volunteerPk: {{ volunteer.pk }}}).addTo(map).bindPopup(popupContent);
-        {% endfor %}
+            '<tr><td>ID:</td><td id="ID{{ volunteer.pk }}">{{ volunteer.id }}</td></tr>' +
+            '<tr><td>Name:</td><td id="name{{ volunteer.pk }}">{{ volunteer.profile.user.name }}</td></tr>' +
+            '<tr><td>Email:</td><td id="email{{ volunteer.pk }}">{{ volunteer.profile.user.email }}</td></tr>' +
+            '<tr><td>Available:</td><td id="availability{{ volunteer.pk }}">{{ volunteer.availability_status }}</td></tr>' +
+            '<tr><td>Phone:</td><td id="phone{{ volunteer.pk }}">{{ volunteer.contact_information }}</td></tr>' +
+            '<tr><td>Weapon:</td><td id="weapon{{ volunteer.pk }}">{{ volunteer.carrying_weapon }}</td></tr>' +
+            '<tr><td>License:</td><td id="license{{ volunteer.pk }}">{{ volunteer.driving_license }}</td></tr>';
+    
+        // Render the ratings data from context
+        popupContent += '<tr><td>Rating:</td><td id="rating{{ volunteer.pk }}">{{ volunteer.average_rating }}</td></tr>';
+    
+        popupContent += '<div id="star-rating-{{ volunteer.pk }}"></div>';
+        // Initialize the star rating widget for the current volunteer
+        $(document).ready(function () {
+            var averageRating = parseFloat("{{ volunteer.average_rating|default:0 }}");
+            $("#star-rating-{{ volunteer.pk }}").rating({
+                min: 0,
+                max: 5,
+                step: 1,
+                size: 'xs',
+                readonly: false,
+                showClear: false,
+                showCaption: false,
+            });
+            $("#star-rating-{{ volunteer.pk }}").rating('update', averageRating);
+        });
+    
+        popupContent += '</table>';
+    
+        L.marker([{{ volunteer.location.y }}, {{ volunteer.location.x }}], {volunteerPk: {{ volunteer.pk }}}).addTo(map).bindPopup(popupContent);
+    {% endfor %}
 
         // Function to update specific fields with JSON data
         function updateVolunteers() {
             $.ajax({
-
                 // TODO change to relative path
                 url: 'http://localhost:8001/emergency/volunteers/update/',
                 type: 'GET',
@@ -90,6 +107,6 @@
         updateVolunteers();
 
         // Automatically update volunteers at a regular interval (e.g., every 60 seconds)
-        setInterval(updateVolunteers, 4000);  // Adjust the interval as needed
-    </script>
+        setInterval(updateVolunteers, 4000);  // Adjust the interval
+</script>
 {% endblock content %}

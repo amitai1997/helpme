@@ -28,6 +28,14 @@ def UpdateVolunteersView(request):
 def CustomAdminView(request):
     # Fetch all EmergencyCall objects
     volunteers = Volunteer.objects.all()
+
+    for volunteer in volunteers:
+        # Retrieve all ratings associated with the volunteer
+        ratings = Rating.objects.filter(
+            object_id=volunteer.id,
+        )
+        volunteer.average_rating = ratings.aggregate(average_rating=models.Avg("average"))["average_rating"] or 0
+
     return render(
         request,
         # TODO change to relative location
@@ -67,6 +75,10 @@ def rate_volunteer(request, volunteer_id):
             # Set the rating value
             rating.rating = rating_value
             rating.save()
+
+            # Set the volunteer's rating to the newly created or updated rating
+            volunteer.rating = rating
+            volunteer.save()
 
             # Calculate the score for the UserRating based on the Rating
             user_rating = UserRating(

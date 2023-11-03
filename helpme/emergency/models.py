@@ -3,6 +3,7 @@ from django.core import serializers
 from django.db import models
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
+from star_ratings.models import Rating
 
 from helpme.users.models import User
 
@@ -135,6 +136,9 @@ class Volunteer(models.Model):
     )
     carrying_weapon = models.BooleanField(null=True)
     driving_license = models.BooleanField(null=True)
+    rating = models.ForeignKey(
+        Rating, on_delete=models.CASCADE, related_name="volunteer_rating", null=True, blank=True
+    )
 
     def save(self, *args, **kwargs):
         choice = self.preferred_area
