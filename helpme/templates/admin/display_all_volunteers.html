@@ -27,22 +27,22 @@
 
         {% for volunteer in volunteers %}
         var popupContent = '<table>' +
-            '<tr><td>ID:</td><td id="ID{{ volunteer.pk }}">{{ volunteer.id }}</td></tr>' +
-            '<tr><td>Name:</td><td id="name{{ volunteer.pk }}">{{ volunteer.profile.user.name }}</td></tr>' +
-            '<tr><td>Email:</td><td id="email{{ volunteer.pk }}">{{ volunteer.profile.user.email }}</td></tr>' +
-            '<tr><td>Available:</td><td id="availability{{ volunteer.pk }}">{{ volunteer.availability_status }}</td></tr>' +
-            '<tr><td>Phone:</td><td id="phone{{ volunteer.pk }}">{{ volunteer.contact_information }}</td></tr>' +
-            '<tr><td>Weapon:</td><td id="weapon{{ volunteer.pk }}">{{ volunteer.carrying_weapon }}</td></tr>' +
-            '<tr><td>License:</td><td id="license{{ volunteer.pk }}">{{ volunteer.driving_license }}</td></tr>';
+            '<tr><td>ID:</td><td id="ID{{ volunteer.id }}">{{ volunteer.id }}</td></tr>' +
+            '<tr><td>Name:</td><td id="name{{ volunteer.id }}">{{ volunteer.profile.user.name }}</td></tr>' +
+            '<tr><td>Email:</td><td id="email{{ volunteer.id }}">{{ volunteer.profile.user.email }}</td></tr>' +
+            '<tr><td>Available:</td><td id="availability{{ volunteer.id }}">{{ volunteer.availability_status }}</td></tr>' +
+            '<tr><td>Phone:</td><td id="phone{{ volunteer.id }}">{{ volunteer.contact_information }}</td></tr>' +
+            '<tr><td>Weapon:</td><td id="weapon{{ volunteer.id }}">{{ volunteer.carrying_weapon }}</td></tr>' +
+            '<tr><td>License:</td><td id="license{{ volunteer.id }}">{{ volunteer.driving_license }}</td></tr>';
     
         // Render the ratings data from context
-        popupContent += '<tr><td>Rating:</td><td id="rating{{ volunteer.pk }}">{{ volunteer.average_rating }}</td></tr>';
+        popupContent += '<tr><td>Rating:</td><td id="rating{{ volunteer.id }}">{{ volunteer.average_rating }}</td></tr>';
     
-        popupContent += '<div id="star-rating-{{ volunteer.pk }}"></div>';
+        popupContent += '<div id="star-rating-{{ volunteer.id }}"></div>';
         // Initialize the star rating widget for the current volunteer
         $(document).ready(function () {
             var averageRating = parseFloat("{{ volunteer.average_rating|default:0 }}");
-            $("#star-rating-{{ volunteer.pk }}").rating({
+            $("#star-rating-{{ volunteer.id }}").rating({
                 min: 0,
                 max: 5,
                 step: 1,
@@ -51,12 +51,12 @@
                 showClear: false,
                 showCaption: false,
             });
-            $("#star-rating-{{ volunteer.pk }}").rating('update', averageRating);
+            $("#star-rating-{{ volunteer.id }}").rating('update', averageRating);
         });
     
         popupContent += '</table>';
     
-        L.marker([{{ volunteer.location.y }}, {{ volunteer.location.x }}], {volunteerPk: {{ volunteer.pk }}}).addTo(map).bindPopup(popupContent);
+        L.marker([{{ volunteer.location.y }}, {{ volunteer.location.x }}], {volunteerId: {{ volunteer.id }}}).addTo(map).bindPopup(popupContent);
     {% endfor %}
 
         // Function to update specific fields with JSON data
@@ -70,21 +70,24 @@
                     var volunteers = JSON.parse(data.volunteers);
 
                     volunteers.forEach(function (volunteer) {
-                        // Update specific fields based on the volunteer's primary key (pk)
-                        $('#availability' + volunteer.pk).text(volunteer.fields.availability_status);
-                        $('#phone' + volunteer.pk).text(volunteer.fields.contact_information);
-                        $('#weapon' + volunteer.pk).text(volunteer.fields.carrying_weapon);
-                        $('#license' + volunteer.pk).text(volunteer.fields.driving_license);
-                        $('#rating' + volunteer.pk).text(volunteer.rating.average);
-
+                        // Update specific fields based on the volunteer's primary key (id)
+                        $('#availability' + volunteer.id).text(volunteer.availability_status);
+                        $('#phone' + volunteer.id).text(volunteer.contact_information);
+                        $('#weapon' + volunteer.id).text(volunteer.carrying_weapon);
+                        $('#license' + volunteer.id).text(volunteer.driving_license);
+                       
+                        // Check if the rating is not null before updating the element
+                        if (volunteer.rating && volunteer.rating.average) {
+                            $('#rating' + volunteer.id).text(volunteer.rating.average);
+                        }
                         // Extract the latitude and longitude from the location field
-                        var locationString = volunteer.fields.location;
-                        var coordinates = locationString.match(/\(([^)]+)\)/)[1].split(' ');
-                        var latitude = parseFloat(coordinates[1]);
-                        var longitude = parseFloat(coordinates[0]);
+                        var locationString = volunteer.location;
+                        var coordinates = locationString.split(',');
+                        var latitude = parseFloat(coordinates[0]);
+                        var longitude = parseFloat(coordinates[1]);
 
                         // Update the marker's position on the map
-                        updateMarkerPosition(volunteer.pk, latitude, longitude);
+                        updateMarkerPosition(volunteer.id, latitude, longitude);
                     });
                 },
                 error: function(xhr, status, error) {
@@ -93,11 +96,11 @@
             });
         }
 
-        function updateMarkerPosition(volunteerPk, newLatitude, newLongitude) {
+        function updateMarkerPosition(volunteerId, newLatitude, newLongitude) {
             // Find the existing marker and update its position
             map.eachLayer(function (layer) {
                 if (layer instanceof L.Marker) {
-                    if (layer.options.volunteerPk === volunteerPk) {
+                    if (layer.options.volunteerId === volunteerId) {
                         layer.setLatLng([newLatitude, newLongitude]);
                     }
                 }

@@ -1,51 +1,35 @@
 import json
 
-from django.contrib.admin.views.decorators import staff_member_required
+# from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib.auth.models import AnonymousUser
 from django.contrib.contenttypes.models import ContentType
-from django.core import serializers
 from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.forms import ValidationError
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-
-# from rest_framework.renderers import JSONRenderer
 from star_ratings.models import Rating, UserRating
 
-# from helpme.emergency.api.serializers import VolunteerSerializer
+from helpme.emergency.api.serializers import VolunteerSerializer
 from helpme.emergency.models import Volunteer
-
-# from helpme.emergency.models import User
 
 
 # @staff_member_required
-# def UpdateVolunteersView(request):
-#     # Fetch all EmergencyCall objects and select related ratings
-#     # volunteers = Volunteer.objects.all()
-#     volunteers = Volunteer.objects.select_related('rating').all()
-
-#     # Serialize the queryset using the serializer
-#     serializer = VolunteerSerializer(volunteers, many=True)
-#     serialized_data = JSONRenderer().render(serializer.data)
-
-#     # return JsonResponse({"volunteers": serialized_data}, safe=False)
-#     return JsonResponse(json.dumps(serializer.data), safe=False)
-
-
-@staff_member_required
+@csrf_exempt
 def UpdateVolunteersView(request):
-    # Fetch all EmergencyCall objects
-    volunteers = Volunteer.objects.all()
+    # Fetch all EmergencyCall objects and select related ratings
+    volunteers = Volunteer.objects.select_related("rating").all()
 
-    # Serialize the queryset to JSON
-    volunteers_json = serializers.serialize("json", volunteers)
+    # Serialize the queryset using the serializer
+    serializer = VolunteerSerializer(volunteers, many=True)
 
-    return JsonResponse({"volunteers": volunteers_json}, safe=False)
+    return JsonResponse({"volunteers": json.dumps(serializer.data)}, safe=False)
+    # return HttpResponse(json.dumps({"volunteers": serializer.data}), content_type="application/json")
 
 
-@staff_member_required
+# @staff_member_required
+@csrf_exempt
 def CustomAdminView(request):
     # Fetch all EmergencyCall objects
     volunteers = Volunteer.objects.all()
