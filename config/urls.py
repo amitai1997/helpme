@@ -16,6 +16,7 @@ urlpatterns = [
     # User management
     path("users/", include("helpme.users.urls", namespace="users")),
     path("emergency/", include("helpme.emergency.urls", namespace="emergency")),
+    path("ratings/", include("star_ratings.urls", namespace="ratings")),
     path("accounts/", include("allauth.urls")),
     # Your stuff: custom urls includes go here
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

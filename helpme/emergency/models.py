@@ -1,3 +1,4 @@
+from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.gis.db import models as gis_models
 from django.core import serializers
 from django.db import models
@@ -139,6 +140,7 @@ class Volunteer(models.Model):
     rating = models.ForeignKey(
         Rating, on_delete=models.SET_NULL, related_name="volunteer_rating", null=True, blank=True
     )
+    GenericRelation(Rating, related_query_name="volunteers")
 
     def save(self, *args, **kwargs):
         choice = self.preferred_area

@@ -37,7 +37,6 @@ urlpatterns = [
     path("volunteers/update/", UpdateVolunteersView, name="update_volunteers"),
     path("volunteers/<int:volunteer_id>/location/", view_volunteer_location, name="volunteer_location"),
     # Ratings and API views
-    path("ratings/", include("star_ratings.urls", namespace="ratings")),
     path("api/volunteers/<int:volunteer_id>/rate/", rate_volunteer, name="rate_volunteer"),
     path("api/volunteers/<int:volunteer_id>/info/", volunteer_rating_info, name="volunteer_info"),
     # Include API routes
